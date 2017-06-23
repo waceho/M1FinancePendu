@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -20,10 +21,15 @@ public class MainActivity extends AppCompatActivity {
     int nbTry = 0;
     int nbGoodTry = 0;
     int nbWrongTry = 0;
+    private Partie partie;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        this.partie = new Partie();
+        partie.date = new Date();
 
         final ImageView sol = (ImageView)findViewById(R.id.sol);
         final ImageView poteau = (ImageView)findViewById(R.id.poteau);
@@ -60,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         System.out.println(randomNum);
         String wordToDiscover = words[randomNum];
 
+        partie.taille_du_mot = wordToDiscover.length();
         final char[] splitWord = wordToDiscover.toCharArray();
         System.out.println(java.util.Arrays.toString(splitWord));
         toDisplay = splitWord[0] + " ";
@@ -165,6 +172,13 @@ public class MainActivity extends AppCompatActivity {
                     reload.setVisibility(View.VISIBLE);
 
                 }
+
+                Saisie s = new Saisie();
+                s.lettre = test.charAt(0);
+                s.nbre_de_vie = 10-nbWrongTry;
+                s.valide = usefulTry;
+
+                MainActivity.this.partie.saisies.add(s);
             }
             //SharedPreferences.Editor stats = getSharedPreferences("successLetters", MODE_PRIVATE).edit();
             //            stats.putString("letters", test)
@@ -173,6 +187,15 @@ public class MainActivity extends AppCompatActivity {
         });
         reload.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                MainActivity.this.partie.score_final = 10 - nbWrongTry;
+
+                EnsembleParties e = EnsembleParties.load(MainActivity.this);
+                if(e == null)
+                    e = new EnsembleParties();
+                e.parties.add(MainActivity.this.partie);
+
+                e.save(MainActivity.this);
+
                 finish();
                 startActivity(getIntent());
             }
